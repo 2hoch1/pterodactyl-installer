@@ -54,8 +54,9 @@ install_base_deps() {
 install_php() {
   section "Adding PHP 8.3 (Sury repo)"
 
+  mkdir -p /etc/apt/keyrings
   curl -sSL https://packages.sury.org/php/apt.gpg \
-    | gpg --dearmor -o /etc/apt/keyrings/sury-php.gpg
+    | gpg --yes --dearmor -o /etc/apt/keyrings/sury-php.gpg
 
   echo "deb [signed-by=/etc/apt/keyrings/sury-php.gpg] \
 https://packages.sury.org/php/ $(lsb_release -cs) main" \
@@ -113,8 +114,10 @@ setup_database() {
 
   mariadb -u root <<SQL
 CREATE USER IF NOT EXISTS 'pterodactyl'@'127.0.0.1' IDENTIFIED BY '${DB_PASSWORD}';
+CREATE USER IF NOT EXISTS 'pterodactyl'@'localhost'  IDENTIFIED BY '${DB_PASSWORD}';
 CREATE DATABASE IF NOT EXISTS panel;
 GRANT ALL PRIVILEGES ON panel.* TO 'pterodactyl'@'127.0.0.1' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON panel.* TO 'pterodactyl'@'localhost'  WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 SQL
 
@@ -174,7 +177,6 @@ install_panel_app() {
     --cache=redis \
     --session=redis \
     --queue=redis \
-    --disable-settings-ui=false \
     --no-interaction
 
   php artisan p:environment:database \
