@@ -4,7 +4,7 @@
 # Target: Debian 13 (Trixie)
 #
 # Run on server:
-#   curl -sSL https://raw.githubusercontent.com/2hoch1/pterodactyl-installer/main/setup.sh -o /tmp/ptero-setup.sh && sudo bash /tmp/ptero-setup.sh
+#   rm -f /tmp/ptero-setup.sh && curl -sSL https://raw.githubusercontent.com/2hoch1/pterodactyl-installer/main/setup.sh -o /tmp/ptero-setup.sh && sudo bash /tmp/ptero-setup.sh
 # =============================================================================
 
 set -euo pipefail

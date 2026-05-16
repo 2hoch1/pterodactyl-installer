@@ -25,7 +25,7 @@ Automated installer for [Pterodactyl Panel](https://pterodactyl.io) and Wings on
 ## Usage
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/2hoch1/pterodactyl-installer/main/setup.sh -o /tmp/ptero-setup.sh && sudo bash /tmp/ptero-setup.sh
+rm -f /tmp/ptero-setup.sh && curl -sSL https://raw.githubusercontent.com/2hoch1/pterodactyl-installer/main/setup.sh -o /tmp/ptero-setup.sh && sudo bash /tmp/ptero-setup.sh
 ```
 
 The setup script asks for:
