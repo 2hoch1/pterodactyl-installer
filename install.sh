@@ -46,7 +46,7 @@ install_base_deps() {
   apt-get update -y
   apt-get install -y \
     curl wget gnupg lsb-release ca-certificates \
-    tar unzip git sudo openssl
+    tar unzip git sudo openssl cron
 
   success "Base packages installed."
 }
