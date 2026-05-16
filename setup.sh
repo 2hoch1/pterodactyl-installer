@@ -33,6 +33,14 @@ confirm_yes() {
   [[ "${answer,,}" == "y" ]]
 }
 
+confirm_no() {
+  local prompt="$1"
+  local answer
+  read -rp "${prompt} [y/N] " answer
+  answer="${answer:-n}"
+  [[ "${answer,,}" == "y" ]]
+}
+
 require_root() {
   [[ $EUID -eq 0 ]] || error "This script must be run as root (use: sudo bash $0)"
 }
@@ -56,6 +64,42 @@ export DB_PASSWORD=""
 export LE_EMAIL=""
 export TIMEZONE=""
 export INSTALL_WINGS="false"
+
+# --- Existing install detection ----------------------------------------------
+
+check_existing_install() {
+  local found=false
+  local reasons=()
+
+  [[ -d /var/www/pterodactyl ]] \
+    && { found=true; reasons+=("Panel files at /var/www/pterodactyl"); }
+
+  if command -v mariadb &>/dev/null; then
+    mariadb -u root -e "SHOW DATABASES LIKE 'panel';" 2>/dev/null \
+      | grep -q panel \
+      && { found=true; reasons+=("Database 'panel' exists in MariaDB"); }
+  fi
+
+  [[ "${found}" == "false" ]] && return
+
+  echo ""
+  echo -e "${YELLOW}${BOLD}Existing installation detected:${RESET}"
+  for r in "${reasons[@]}"; do echo "  - ${r}"; done
+  echo ""
+  echo -e "${RED}Continuing will permanently delete the above.${RESET}"
+  echo ""
+  confirm_no "Override existing installation and continue?" \
+    || { echo "Aborted."; exit 0; }
+
+  info "Removing existing installation..."
+  rm -rf /var/www/pterodactyl
+  mariadb -u root <<SQL 2>/dev/null || true
+DROP DATABASE IF EXISTS panel;
+DROP USER IF EXISTS 'pterodactyl'@'127.0.0.1';
+DROP USER IF EXISTS 'pterodactyl'@'localhost';
+SQL
+  success "Existing installation removed."
+}
 
 # --- Input gathering ---------------------------------------------------------
 
@@ -170,6 +214,7 @@ locate_install_script() {
 
 require_root
 require_debian13
+check_existing_install
 gather_input
 
 INSTALL_SCRIPT="$(locate_install_script)"
